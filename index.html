@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clasificador de Postura Corporal — HPC + CUDA + MLP</title>
+  <meta name="description" content="Sustentación técnica universitaria: Clasificador de Postura Corporal usando OpenMP, CUDA y Redes Neuronales desde Cero. Ingeniería de Sistemas — Cómputo Paralelo y Distribuido." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ===================== NAVIGATION ===================== -->
+<nav class="nav-bar" id="navbar">
+  <div class="nav-logo">
+    <span class="logo-icon">⬡</span>
+    <span>HPC·CUDA·MLP</span>
+  </div>
+  <div class="nav-slides">
+    <button class="nav-dot active" data-slide="0" title="Portada"></button>
+    <button class="nav-dot" data-slide="1" title="Dataset"></button>
+    <button class="nav-dot" data-slide="2" title="Preprocesamiento"></button>
+    <button class="nav-dot" data-slide="3" title="Red Neuronal"></button>
+    <button class="nav-dot" data-slide="4" title="CUDA GPU"></button>
+    <button class="nav-dot" data-slide="5" title="Métricas & App"></button>
+    <button class="nav-dot" data-slide="6" title="Conclusiones"></button>
+  </div>
+  <div class="nav-counter">
+    <span id="slide-counter">1 / 7</span>
+  </div>
+</nav>
+
+<!-- ===================== PROGRESS BAR ===================== -->
+<div class="progress-bar-container">
+  <div class="progress-bar" id="progress-bar"></div>
+</div>
+
+<!-- ===================== SLIDES WRAPPER ===================== -->
+<div class="slides-wrapper" id="slides-wrapper">
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 0 · PORTADA -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="slide" id="slide-0">
+    <div class="slide-bg-grid"></div>
+    <div class="cover-particles" id="particles"></div>
+
+    <div class="cover-content">
+      <!-- Badge -->
+      <div class="tech-badge-row">
+        <span class="tech-badge">OpenMP</span>
+        <span class="tech-badge green">CUDA</span>
+        <span class="tech-badge blue">MLP</span>
+        <span class="tech-badge purple">HPC</span>
+      </div>
+
+      <h1 class="cover-title">
+        Clasificador de Postura Corporal
+        <span class="gradient-text">desde Cero</span>
+      </h1>
+      <p class="cover-subtitle">OpenMP · CUDA · Redes Neuronales · Pipeline Computacional Completo</p>
+
+      <!-- GPU Architecture Diagram SVG -->
+      <div class="gpu-diagram-wrapper">
+        <svg class="gpu-diagram" viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="pipeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#76b900;stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#00d4ff;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Pipeline line -->
+          <line x1="60" y1="65" x2="640" y2="65" stroke="url(#pipeGrad)" stroke-width="2.5" stroke-dasharray="8,4" opacity="0.6"/>
+          <!-- Nodes -->
+          <g filter="url(#glow)">
+            <!-- Dataset -->
+            <circle cx="60" cy="65" r="22" fill="#0a0e1a" stroke="#76b900" stroke-width="2"/>
+            <text x="60" y="61" text-anchor="middle" fill="#76b900" font-size="11" font-family="Outfit">📂</text>
+            <text x="60" y="98" text-anchor="middle" fill="#76b900" font-size="9" font-family="Outfit">Dataset</text>
+            <!-- Sobel -->
+            <circle cx="170" cy="65" r="22" fill="#0a0e1a" stroke="#00d4ff" stroke-width="2"/>
+            <text x="170" y="61" text-anchor="middle" fill="#00d4ff" font-size="11" font-family="Outfit">⚡</text>
+            <text x="170" y="98" text-anchor="middle" fill="#00d4ff" font-size="9" font-family="Outfit">OpenMP</text>
+            <!-- Sobel filter -->
+            <circle cx="280" cy="65" r="22" fill="#0a0e1a" stroke="#00d4ff" stroke-width="2"/>
+            <text x="280" y="61" text-anchor="middle" fill="#00d4ff" font-size="11" font-family="Outfit">🔲</text>
+            <text x="280" y="98" text-anchor="middle" fill="#00d4ff" font-size="9" font-family="Outfit">Sobel</text>
+            <!-- MLP -->
+            <circle cx="390" cy="65" r="22" fill="#0a0e1a" stroke="#a855f7" stroke-width="2"/>
+            <text x="390" y="61" text-anchor="middle" fill="#a855f7" font-size="11" font-family="Outfit">🧠</text>
+            <text x="390" y="98" text-anchor="middle" fill="#a855f7" font-size="9" font-family="Outfit">MLP</text>
+            <!-- CUDA -->
+            <circle cx="500" cy="65" r="22" fill="#0a0e1a" stroke="#76b900" stroke-width="2"/>
+            <text x="500" y="61" text-anchor="middle" fill="#76b900" font-size="11" font-family="Outfit">🚀</text>
+            <text x="500" y="98" text-anchor="middle" fill="#76b900" font-size="9" font-family="Outfit">CUDA GPU</text>
+            <!-- App -->
+            <circle cx="610" cy="65" r="22" fill="#0a0e1a" stroke="#f59e0b" stroke-width="2"/>
+            <text x="610" y="61" text-anchor="middle" fill="#f59e0b" font-size="11" font-family="Outfit">🎯</text>
+            <text x="610" y="98" text-anchor="middle" fill="#f59e0b" font-size="9" font-family="Outfit">Streamlit</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="cover-meta">
+        <div class="meta-card">
+          <div class="meta-label">INTEGRANTES</div>
+          <div class="meta-value names-list">
+            <span>Ángel Smith Duarte Jaimes</span>
+            <span>Angie Margarita Duarte Jaimes</span>
+            <span>Carlos Andrés Jaimes Guerrero</span>
+            <span>Carlos Andrés Vega Gamboa</span>
+            <span>Luisa Fernanda Salamanca Pérez</span>
+          </div>
+        </div>
+        <div class="meta-right">
+          <div class="meta-card small">
+            <div class="meta-label">UNIVERSIDAD</div>
+            <div class="meta-value">Universidad de Pamplona</div>
+          </div>
+          <div class="meta-card small">
+            <div class="meta-label">ASIGNATURA</div>
+            <div class="meta-value">Cómputo Paralelo y Distribuido</div>
+          </div>
+          <div class="meta-card small">
+            <div class="meta-label">SEMESTRE</div>
+            <div class="meta-value">2026 — I</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 1 · PERSONA 1 — DATASET -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="slide" id="slide-1">
+    <div class="slide-bg-grid"></div>
+    <div class="slide-inner">
+      <div class="slide-header">
+        <span class="persona-badge p1">PERSONA 1</span>
+        <h2 class="slide-title">Recolección y Organización del Dataset</h2>
+        <p class="slide-subtitle">De carpetas brutas a tensores listos para entrenamiento</p>
+      </div>
+
+      <div class="content-grid two-col">
+        <!-- Left: estructura de carpetas -->
+        <div class="panel glass">
+          <h3 class="panel-title"><span class="icon-dot green"></span>Estructura Original</h3>
+          <div class="folder-tree">
+            <div class="folder-item root">📁 imagenes/</div>
+            <div class="folder-item l1">📁 postura_recta/</div>
+            <div class="folder-item l2">🖼 img_001.jpg</div>
+            <div class="folder-item l2">🖼 img_002.jpg  <span class="tag">···</span></div>
+            <div class="folder-item l1">📁 postura_encorvada/</div>
+            <div class="folder-item l2">🖼 img_001.jpg</div>
+            <div class="folder-item l2">🖼 img_002.jpg  <span class="tag">···</span></div>
+          </div>
+
+          <div class="arrow-down">▼ <code>organizar_dataset.py</code></div>
+
+          <div class="folder-tree">
+            <div class="folder-item root">📁 dataset/processed/</div>
+            <div class="folder-item l1 green-text">📁 train/ &nbsp;<span class="tag green">1042 imgs</span></div>
+            <div class="folder-item l2">📁 postura_recta/</div>
+            <div class="folder-item l2">📁 postura_encorvada/</div>
+            <div class="folder-item l1 blue-text">📁 val/ &nbsp;<span class="tag blue">223 imgs</span></div>
+            <div class="folder-item l1 purple-text">📁 test/ &nbsp;<span class="tag purple">224 imgs</span></div>
+            <div class="folder-item l1">📄 train.txt &nbsp; val.txt &nbsp; test.txt</div>
+          </div>
+        </div>
+
+        <!-- Right: splits + script + dataset info -->
+        <div class="panel-col">
+          <!-- Split donut-like chart -->
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot blue"></span>División Estratificada</h3>
+            <div class="split-bar-wrapper">
+              <div class="split-bar">
+                <div class="split-seg green" style="width:70%">
+                  <span class="split-label">Train<br>70%<br>1042</span>
+                </div>
+                <div class="split-seg blue" style="width:15%">
+                  <span class="split-label">Val<br>15%<br>223</span>
+                </div>
+                <div class="split-seg purple" style="width:15%">
+                  <span class="split-label">Test<br>15%<br>224</span>
+                </div>
+              </div>
+              <div class="split-total">Total: <strong>1489 imágenes</strong></div>
+            </div>
+
+            <div class="code-block small">
+<pre><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
+
+X_train, X_resto, y_train, y_resto = train_test_split(
+    imagenes, etiquetas,
+    test_size=<span class="num">0.30</span>, random_state=<span class="num">42</span>,
+    stratify=etiquetas        <span class="cm"># Conserva proporción de clases</span>
+)
+X_val, X_test, y_val, y_test = train_test_split(
+    X_resto, y_resto,
+    test_size=<span class="num">0.50</span>, random_state=<span class="num">42</span>,
+    stratify=y_resto
+)</pre>
+            </div>
+          </div>
+
+          <!-- Dataset characteristics -->
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot purple"></span>Características del Dataset</h3>
+            <div class="stat-pills">
+              <div class="stat-pill"><span class="stat-n">2</span><span class="stat-desc">Clases</span></div>
+              <div class="stat-pill"><span class="stat-n">1489</span><span class="stat-desc">Imágenes</span></div>
+              <div class="stat-pill"><span class="stat-n">5+</span><span class="stat-desc">Sujetos</span></div>
+            </div>
+            <ul class="feat-list">
+              <li>🌤 Variaciones de iluminación (natural / artificial)</li>
+              <li>📐 Distintos ángulos y distancias a cámara</li>
+              <li>👕 Variedad de vestimenta y fondos</li>
+              <li>⚖ Balanceo de clases mediante stratify</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image placeholders row -->
+      <div class="img-placeholder-row">
+        <div class="img-placeholder">
+          <div class="ph-frame">
+            <span class="ph-icon">🖼</span>
+            <span class="ph-name">dataset_original_1.png</span>
+            <span class="ph-hint">Muestra postura_recta</span>
+          </div>
+        </div>
+        <div class="img-placeholder">
+          <div class="ph-frame">
+            <span class="ph-icon">🖼</span>
+            <span class="ph-name">dataset_original_2.png</span>
+            <span class="ph-hint">Muestra postura_encorvada</span>
+          </div>
+        </div>
+        <div class="img-placeholder">
+          <div class="ph-frame">
+            <span class="ph-icon">🔗</span>
+            <span class="ph-name">Google Drive</span>
+            <span class="ph-hint">[insertar link del dataset]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 2 · PERSONA 2 — PREPROCESAMIENTO OpenMP + SOBEL -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="slide" id="slide-2">
+    <div class="slide-bg-grid"></div>
+    <div class="slide-inner">
+      <div class="slide-header">
+        <span class="persona-badge p2">PERSONA 2</span>
+        <h2 class="slide-title">Preprocesamiento OpenMP + Filtro Sobel</h2>
+        <p class="slide-subtitle">Pipeline paralelo de transformación de imágenes a tensores</p>
+      </div>
+
+      <div class="content-grid two-col">
+        <!-- Pipeline visual -->
+        <div class="panel glass">
+          <h3 class="panel-title"><span class="icon-dot blue"></span>Pipeline de Transformación</h3>
+          <div class="pipeline-vertical">
+            <div class="pipeline-step">
+              <div class="ps-icon" style="background:linear-gradient(135deg,#1e3a5f,#0a0e1a)">📷</div>
+              <div class="ps-content">
+                <div class="ps-name">Imagen Original</div>
+                <div class="ps-detail">RGB · Tamaño variable · stbi_load()</div>
+              </div>
+            </div>
+            <div class="pipeline-arrow">↓</div>
+            <div class="pipeline-step">
+              <div class="ps-icon" style="background:linear-gradient(135deg,#1e3a5f,#0a0e1a)">⬜</div>
+              <div class="ps-content">
+                <div class="ps-name">Escala de Grises</div>
+                <div class="ps-detail">1 canal · Luminancia perceptual</div>
+              </div>
+            </div>
+            <div class="pipeline-arrow">↓</div>
+            <div class="pipeline-step">
+              <div class="ps-icon" style="background:linear-gradient(135deg,#0d3348,#0a0e1a)">📐</div>
+              <div class="ps-content">
+                <div class="ps-name">Resize 64×64</div>
+                <div class="ps-detail">stbir_resize_uint8_linear() · Interpolación bilinear</div>
+              </div>
+            </div>
+            <div class="pipeline-arrow">↓</div>
+            <div class="pipeline-step glow-step">
+              <div class="ps-icon" style="background:linear-gradient(135deg,#003d3d,#0a0e1a)">🔲</div>
+              <div class="ps-content">
+                <div class="ps-name">Filtro Sobel</div>
+                <div class="ps-detail">Detección de bordes · Extracción de geometría corporal</div>
+              </div>
+            </div>
+            <div class="pipeline-arrow">↓</div>
+            <div class="pipeline-step">
+              <div class="ps-icon" style="background:linear-gradient(135deg,#2d1b4e,#0a0e1a)">〰</div>
+              <div class="ps-content">
+                <div class="ps-name">Flatten + Normalización</div>
+                <div class="ps-detail">4096 floats · rango [0, 1]</div>
+              </div>
+            </div>
+            <div class="pipeline-arrow">↓</div>
+            <div class="pipeline-step">
+              <div class="ps-icon" style="background:linear-gradient(135deg,#1a3d1a,#0a0e1a)">💾</div>
+              <div class="ps-content">
+                <div class="ps-name">Archivo Binario .bin</div>
+                <div class="ps-detail">X_train.bin · y_train.bin · X_val.bin · y_val.bin · X_test.bin · y_test.bin</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OpenMP code + Sobel -->
+        <div class="panel-col">
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot green"></span>Paralelismo OpenMP</h3>
+            <div class="code-block">
+<pre><span class="cm">// Configurar 12 hilos para el procesamiento</span>
+omp_set_num_threads(<span class="num">12</span>);
+<span class="kw">double</span> t0 = omp_get_wtime();
+
+<span class="cm">// Cada hilo procesa imágenes independientes</span>
+<span class="pragma">#pragma omp parallel for schedule(dynamic) num_threads(12)</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; num_images; i++) {
+    <span class="cm">// Lectura independiente por hilo</span>
+    unsigned char* img = stbi_load(path, &amp;w, &amp;h, &amp;c, <span class="num">1</span>);
+    <span class="cm">// Resize a 64x64</span>
+    stbir_resize_uint8_linear(img, w, h, <span class="num">0</span>,
+                              resized, <span class="num">64</span>, <span class="num">64</span>, <span class="num">0</span>, <span class="num">1</span>);
+    <span class="cm">// Sobel → Flatten → Normalizar</span>
+    apply_sobel(resized, sobel, <span class="num">64</span>, <span class="num">64</span>);
+    <span class="kw">for</span> (<span class="kw">int</span> p = <span class="num">0</span>; p &lt; FLATTENED_SIZE; p++)
+        X_data[i*FLATTENED_SIZE+p] = sobel[p] / <span class="num">255.0f</span>;
+}</pre>
+            </div>
+            <div class="insight-box">
+              <span class="insight-icon">⚡</span>
+              <span><strong>schedule(dynamic)</strong> balancea la carga entre hilos cuando las imágenes tienen distintos tamaños originales. Cada hilo opera sobre su propio buffer de memoria → sin condiciones de carrera.</span>
+            </div>
+          </div>
+
+          <!-- Sobel -->
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot blue"></span>Filtro Sobel — Detección de Bordes</h3>
+
+            <div class="img-compare-row">
+              <div class="img-placeholder small">
+                <div class="ph-frame">
+                  <span class="ph-icon">📷</span>
+                  <span class="ph-name">imagen_original.png</span>
+                </div>
+              </div>
+              <div class="compare-arrow">→</div>
+              <div class="img-placeholder small">
+                <div class="ph-frame" style="border-color:#00d4ff">
+                  <span class="ph-icon" style="color:#00d4ff">🔲</span>
+                  <span class="ph-name" style="color:#00d4ff">imagen_sobel.png</span>
+                </div>
+              </div>
+            </div>
+            <div class="insight-box">
+              <span class="insight-icon">🎯</span>
+              <span>Sobel extrae la <strong>geometría corporal</strong>: curvatura de columna, ángulo de hombros. Elimina información de color/textura irrelevante para la clasificación de postura.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 3 · PERSONA 3 — MLP + FORWARD PASS -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="slide" id="slide-3">
+    <div class="slide-bg-grid"></div>
+    <div class="slide-inner">
+      <div class="slide-header">
+        <span class="persona-badge p3">PERSONA 3</span>
+        <h2 class="slide-title">Arquitectura MLP & Forward Pass</h2>
+        <p class="slide-subtitle">Red Neuronal Multicapa implementada desde cero en CUDA y Python</p>
+      </div>
+
+      <div class="content-grid two-col">
+        <!-- MLP Architecture Visual -->
+        <div class="panel glass">
+          <h3 class="panel-title"><span class="icon-dot purple"></span>Arquitectura 4096 → 128 → 1</h3>
+
+          <div class="mlp-arch-svg-wrapper">
+            <svg viewBox="0 0 440 240" xmlns="http://www.w3.org/2000/svg" class="mlp-svg">
+              <defs>
+                <linearGradient id="nodeGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0.8"/>
+                  <stop offset="100%" style="stop-color:#0a0e1a;stop-opacity:1"/>
+                </linearGradient>
+                <linearGradient id="nodeGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#a855f7;stop-opacity:0.8"/>
+                  <stop offset="100%" style="stop-color:#0a0e1a;stop-opacity:1"/>
+                </linearGradient>
+                <linearGradient id="nodeGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#76b900;stop-opacity:0.8"/>
+                  <stop offset="100%" style="stop-color:#0a0e1a;stop-opacity:1"/>
+                </linearGradient>
+              </defs>
+
+              <!-- Input layer nodes (sampled) -->
+              <text x="55" y="20" text-anchor="middle" fill="#00d4ff" font-size="10" font-family="Outfit">Entrada</text>
+              <text x="55" y="32" text-anchor="middle" fill="#6b7280" font-size="9" font-family="Outfit">4096 nodos</text>
+              <circle cx="55" cy="60" r="7" fill="url(#nodeGrad1)" stroke="#00d4ff" stroke-width="1"/>
+              <circle cx="55" cy="85" r="7" fill="url(#nodeGrad1)" stroke="#00d4ff" stroke-width="1"/>
+              <circle cx="55" cy="110" r="7" fill="url(#nodeGrad1)" stroke="#00d4ff" stroke-width="1"/>
+              <text x="55" y="127" text-anchor="middle" fill="#6b7280" font-size="9" font-family="Outfit">···</text>
+              <circle cx="55" cy="140" r="7" fill="url(#nodeGrad1)" stroke="#00d4ff" stroke-width="1"/>
+              <circle cx="55" cy="165" r="7" fill="url(#nodeGrad1)" stroke="#00d4ff" stroke-width="1"/>
+              <circle cx="55" cy="190" r="7" fill="url(#nodeGrad1)" stroke="#00d4ff" stroke-width="1"/>
+
+              <!-- connections input→hidden (sample) -->
+              <g stroke="#00d4ff" stroke-width="0.4" opacity="0.25">
+                <line x1="62" y1="60" x2="198" y2="70"/>
+                <line x1="62" y1="60" x2="198" y2="100"/>
+                <line x1="62" y1="110" x2="198" y2="70"/>
+                <line x1="62" y1="110" x2="198" y2="130"/>
+                <line x1="62" y1="165" x2="198" y2="155"/>
+                <line x1="62" y1="190" x2="198" y2="155"/>
+                <line x1="62" y1="85" x2="198" y2="100"/>
+                <line x1="62" y1="140" x2="198" y2="130"/>
+              </g>
+
+              <!-- Hidden layer -->
+              <text x="210" y="20" text-anchor="middle" fill="#a855f7" font-size="10" font-family="Outfit">Capa Oculta</text>
+              <text x="210" y="32" text-anchor="middle" fill="#6b7280" font-size="9" font-family="Outfit">128 nodos · ReLU</text>
+              <circle cx="210" cy="60" r="8" fill="url(#nodeGrad2)" stroke="#a855f7" stroke-width="1.5"/>
+              <circle cx="210" cy="85" r="8" fill="url(#nodeGrad2)" stroke="#a855f7" stroke-width="1.5"/>
+              <circle cx="210" cy="110" r="8" fill="url(#nodeGrad2)" stroke="#a855f7" stroke-width="1.5"/>
+              <text x="210" y="130" text-anchor="middle" fill="#6b7280" font-size="9" font-family="Outfit">···</text>
+              <circle cx="210" cy="145" r="8" fill="url(#nodeGrad2)" stroke="#a855f7" stroke-width="1.5"/>
+              <circle cx="210" cy="170" r="8" fill="url(#nodeGrad2)" stroke="#a855f7" stroke-width="1.5"/>
+
+              <!-- connections hidden→output -->
+              <g stroke="#a855f7" stroke-width="0.8" opacity="0.4">
+                <line x1="218" y1="60" x2="365" y2="120"/>
+                <line x1="218" y1="85" x2="365" y2="120"/>
+                <line x1="218" y1="110" x2="365" y2="120"/>
+                <line x1="218" y1="145" x2="365" y2="120"/>
+                <line x1="218" y1="170" x2="365" y2="120"/>
+              </g>
+
+              <!-- Output -->
+              <text x="375" y="20" text-anchor="middle" fill="#76b900" font-size="10" font-family="Outfit">Salida</text>
+              <text x="375" y="32" text-anchor="middle" fill="#6b7280" font-size="9" font-family="Outfit">1 nodo · Sigmoid</text>
+              <circle cx="375" cy="120" r="14" fill="url(#nodeGrad3)" stroke="#76b900" stroke-width="2"/>
+              <text x="375" y="124" text-anchor="middle" fill="#76b900" font-size="9" font-family="JetBrains Mono">P(y)</text>
+
+              <!-- Labels W1 and W2 -->
+              <text x="130" y="210" text-anchor="middle" fill="#6b7280" font-size="9" font-family="Outfit">W1 [128×4096]</text>
+              <text x="295" y="210" text-anchor="middle" fill="#6b7280" font-size="9" font-family="Outfit">W2 [1×128]</text>
+            </svg>
+          </div>
+
+          <!-- Forward equations -->
+          <div class="eq-block">
+            <div class="eq-row">
+              <span class="eq-label">Z1</span>
+              <span class="eq-eq">=</span>
+              <span class="eq-formula">X · W1ᵀ + b1</span>
+              <span class="eq-dim">[N × 128]</span>
+            </div>
+            <div class="eq-row">
+              <span class="eq-label" style="color:#a855f7">A1</span>
+              <span class="eq-eq">=</span>
+              <span class="eq-formula">ReLU(Z1) = max(0, Z1)</span>
+            </div>
+            <div class="eq-row">
+              <span class="eq-label">Z2</span>
+              <span class="eq-eq">=</span>
+              <span class="eq-formula">A1 · W2ᵀ + b2</span>
+              <span class="eq-dim">[N × 1]</span>
+            </div>
+            <div class="eq-row">
+              <span class="eq-label" style="color:#76b900">A2</span>
+              <span class="eq-eq">=</span>
+              <span class="eq-formula">σ(Z2) = 1 / (1 + e⁻ᶻ²)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code + activations -->
+        <div class="panel-col">
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot green"></span>Forward Pass — Kernel CUDA</h3>
+            <div class="code-block">
+<pre><span class="cm">// Kernel: Capa 1 (Entrada → Oculta + ReLU)</span>
+<span class="kw">__global__</span> void forward_layer1(
+    float* X, float* W1, float* b1,
+    float* A1, int num_images)
+{
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (row &lt; num_images &amp;&amp; col &lt; HIDDEN_SIZE) {
+        float sum = <span class="num">0.0f</span>;
+        <span class="kw">for</span> (int i = <span class="num">0</span>; i &lt; INPUT_SIZE; i++)
+            sum += X[row*INPUT_SIZE+i] * W1[col*INPUT_SIZE+i];
+        sum += b1[col];
+        <span class="cm">// ReLU inline</span>
+        A1[row*HIDDEN_SIZE+col] = fmaxf(<span class="num">0.0f</span>, sum);
+    }
+}</pre>
+            </div>
+          </div>
+
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot blue"></span>Forward Pass — Inferencia Python</h3>
+            <div class="code-block">
+<pre><span class="cm"># Pesos cargados desde binarios CUDA (.bin)</span>
+W1 = np.fromfile(<span class="str">"weights/W1.bin"</span>,
+     dtype=np.float32).reshape(<span class="num">128</span>, <span class="num">4096</span>)
+
+<span class="cm"># Capa oculta: Z1 = X·W1ᵀ + b1 → A1 = ReLU</span>
+z1 = np.dot(x_vector, w1.T) + b1
+a1 = np.maximum(<span class="num">0</span>, z1)             <span class="cm"># ReLU</span>
+
+<span class="cm"># Capa salida: Z2 = A1·W2ᵀ + b2 → A2 = σ</span>
+z2 = np.dot(a1, w2.T) + b2
+a2 = <span class="num">1.0</span> / (<span class="num">1.0</span> + np.exp(-z2))   <span class="cm"># Sigmoid</span>
+
+<span class="cm"># Umbral de decisión</span>
+pred = <span class="str">"ENCORVADA"</span> <span class="kw">if</span> a2[<span class="num">0</span>] &gt;= <span class="num">0.5</span> <span class="kw">else</span> <span class="str">"RECTA"</span></pre>
+            </div>
+          </div>
+
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot purple"></span>Funciones de Activación</h3>
+            <div class="activation-cards">
+              <div class="act-card">
+                <div class="act-name">ReLU(x)</div>
+                <div class="act-formula">max(0, x)</div>
+                <div class="act-desc">Capa oculta · Introduce no-linealidad · Evita vanishing gradient</div>
+              </div>
+              <div class="act-card" style="border-color:#76b900">
+                <div class="act-name" style="color:#76b900">Sigmoid(x)</div>
+                <div class="act-formula" style="color:#76b900">1 / (1 + e⁻ˣ)</div>
+                <div class="act-desc">Capa salida · Salida en [0,1] · P(postura encorvada)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 4 · PERSONA 4 — CUDA + ENTRENAMIENTO GPU -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="slide" id="slide-4">
+    <div class="slide-bg-grid"></div>
+    <div class="slide-inner">
+      <div class="slide-header">
+        <span class="persona-badge p4">PERSONA 4</span>
+        <h2 class="slide-title">Entrenamiento CUDA en GPU</h2>
+        <p class="slide-subtitle">Paralelismo masivo: kernels, grids, blocks y backward pass acelerado</p>
+      </div>
+
+      <div class="content-grid two-col">
+        <!-- CUDA thread model -->
+        <div class="panel-col">
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot green"></span>Modelo de Ejecución CUDA</h3>
+            <div class="cuda-thread-model">
+              <svg viewBox="0 0 340 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:180px">
+                <defs>
+                  <linearGradient id="gridGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#76b900;stop-opacity:0.15"/>
+                    <stop offset="100%" style="stop-color:#76b900;stop-opacity:0.05"/>
+                  </linearGradient>
+                </defs>
+                <!-- Grid label -->
+                <rect x="5" y="5" width="330" height="170" rx="6" fill="url(#gridGrad)" stroke="#76b900" stroke-width="1" stroke-dasharray="6,3"/>
+                <text x="15" y="22" fill="#76b900" font-size="10" font-family="Outfit" font-weight="700">GRID</text>
+                <!-- Block 1 -->
+                <rect x="20" y="30" width="90" height="65" rx="4" fill="#0d2010" stroke="#76b900" stroke-width="1"/>
+                <text x="65" y="46" text-anchor="middle" fill="#76b900" font-size="9" font-family="Outfit">Block (0,0)</text>
+                <!-- Threads inside block 1 -->
+                <rect x="28" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.7"/><text x="35" y="62" text-anchor="middle" fill="#000" font-size="7" font-family="Outfit">T</text>
+                <rect x="46" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.7"/><text x="53" y="62" text-anchor="middle" fill="#000" font-size="7" font-family="Outfit">T</text>
+                <rect x="64" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.7"/><text x="71" y="62" text-anchor="middle" fill="#000" font-size="7" font-family="Outfit">T</text>
+                <rect x="82" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.7"/><text x="89" y="62" text-anchor="middle" fill="#000" font-size="7" font-family="Outfit">T</text>
+                <text x="35" y="89" text-anchor="middle" fill="#6b7280" font-size="7" font-family="Outfit">32×32</text>
+                <text x="65" y="89" text-anchor="middle" fill="#6b7280" font-size="7" font-family="Outfit">threads</text>
+                <!-- Block 2 -->
+                <rect x="120" y="30" width="90" height="65" rx="4" fill="#0d2010" stroke="#76b900" stroke-width="1"/>
+                <text x="165" y="46" text-anchor="middle" fill="#76b900" font-size="9" font-family="Outfit">Block (1,0)</text>
+                <rect x="128" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.7"/>
+                <rect x="146" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.7"/>
+                <rect x="164" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.7"/>
+                <rect x="182" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.7"/>
+                <text x="165" y="89" text-anchor="middle" fill="#6b7280" font-size="7" font-family="Outfit">1024 threads</text>
+                <!-- Block 3 -->
+                <rect x="220" y="30" width="90" height="65" rx="4" fill="#0d2010" stroke="#76b900" stroke-width="1"/>
+                <text x="265" y="46" text-anchor="middle" fill="#76b900" font-size="9" font-family="Outfit">Block (2,0)</text>
+                <rect x="228" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.5"/>
+                <rect x="246" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.5"/>
+                <rect x="264" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.5"/>
+                <rect x="282" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.5"/>
+                <text x="265" y="89" text-anchor="middle" fill="#6b7280" font-size="7" font-family="Outfit">paralelo</text>
+                <!-- Row 2 -->
+                <rect x="20" y="105" width="90" height="50" rx="4" fill="#0d2010" stroke="#76b900" stroke-width="1" opacity="0.6"/>
+                <text x="65" y="135" text-anchor="middle" fill="#76b900" font-size="8" font-family="Outfit" opacity="0.6">Block (0,1)</text>
+                <rect x="120" y="105" width="90" height="50" rx="4" fill="#0d2010" stroke="#76b900" stroke-width="1" opacity="0.6"/>
+                <text x="165" y="135" text-anchor="middle" fill="#76b900" font-size="8" font-family="Outfit" opacity="0.6">Block (1,1)</text>
+                <text x="240" y="135" fill="#6b7280" font-size="18" font-family="Outfit" opacity="0.5">···</text>
+              </svg>
+            </div>
+            <div class="code-block small">
+<pre><span class="cm">// Configuración dinámica: block 32×32</span>
+dim3 threadsPerBlock(<span class="num">32</span>, <span class="num">32</span>);  <span class="cm">// 1024 threads/block</span>
+dim3 grid_FW1(
+  (HIDDEN_SIZE + <span class="num">32</span> - <span class="num">1</span>) / <span class="num">32</span>,
+  (num_images   + <span class="num">32</span> - <span class="num">1</span>) / <span class="num">32</span>
+);
+
+<span class="cm">// Lanzamiento del kernel</span>
+forward_layer1&lt;&lt;&lt;grid_FW1, threadsPerBlock&gt;&gt;&gt;(
+    d_X, d_W1, d_b1, d_A1, N);</pre>
+            </div>
+          </div>
+
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot blue"></span>Backward Pass — Kernel Capa 1</h3>
+            <div class="code-block small">
+<pre><span class="kw">__global__</span> void compute_dz1(
+    float* dZ2, float* W2,
+    float* A1,  float* dZ1, int N)
+{
+    int row = blockIdx.y*blockDim.y + threadIdx.y;
+    int col = blockIdx.x*blockDim.x + threadIdx.x;
+    if (row &lt; N &amp;&amp; col &lt; HIDDEN_SIZE) {
+        <span class="cm">// Derivada de ReLU (función escalón)</span>
+        float relu_d = (A1[row*HIDDEN_SIZE+col] &gt; <span class="num">0.0f</span>)
+                       ? <span class="num">1.0f</span> : <span class="num">0.0f</span>;
+        dZ1[row*HIDDEN_SIZE+col] =
+            dZ2[row] * W2[col] * relu_d;
+    }
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Training loop + metrics -->
+        <div class="panel-col">
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot purple"></span>Flujo de Entrenamiento</h3>
+            <div class="training-flow">
+              <div class="tf-step">
+                <span class="tf-n">1</span>
+                <div>
+                  <strong>Transferencia Host → Device</strong>
+                  <div class="tf-sub">cudaMemcpy(d_X, h_X, ... cudaMemcpyHostToDevice)</div>
+                </div>
+              </div>
+              <div class="tf-step">
+                <span class="tf-n">2</span>
+                <div>
+                  <strong>Forward Pass (GPU)</strong>
+                  <div class="tf-sub">forward_layer1 &amp; forward_layer2 en paralelo</div>
+                </div>
+              </div>
+              <div class="tf-step">
+                <span class="tf-n">3</span>
+                <div>
+                  <strong>Backward Pass (GPU)</strong>
+                  <div class="tf-sub">compute_dz2 → compute_dz1 → gradientes</div>
+                </div>
+              </div>
+              <div class="tf-step">
+                <span class="tf-n">4</span>
+                <div>
+                  <strong>Update de Pesos + L2</strong>
+                  <div class="tf-sub">update_layer1 &amp; update_layer2 · λ=0.0005</div>
+                </div>
+              </div>
+              <div class="tf-step">
+                <span class="tf-n">5</span>
+                <div>
+                  <strong>Early Stopping</strong>
+                  <div class="tf-sub">Val loss monitorizada cada 100 épocas · patience=4</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hyperparam-grid">
+              <div class="hp-item"><span class="hp-k">Épocas</span><span class="hp-v">1000 (con ES)</span></div>
+              <div class="hp-item"><span class="hp-k">Learning Rate</span><span class="hp-v">0.05</span></div>
+              <div class="hp-item"><span class="hp-k">L2 λ</span><span class="hp-v">0.0005</span></div>
+              <div class="hp-item"><span class="hp-k">Block Size</span><span class="hp-v">32×32</span></div>
+              <div class="hp-item"><span class="hp-k">Loss Fn</span><span class="hp-v">BCE</span></div>
+              <div class="hp-item"><span class="hp-k">Patience</span><span class="hp-v">4 eval</span></div>
+            </div>
+          </div>
+
+          <!-- GPU Placeholders -->
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot green"></span>Análisis de Rendimiento GPU</h3>
+            <div class="img-placeholder-row vertical">
+              <div class="img-placeholder">
+                <div class="ph-frame">
+                  <span class="ph-icon">📊</span>
+                  <span class="ph-name">cpu_vs_gpu.png</span>
+                  <span class="ph-hint">Speedup CPU vs GPU</span>
+                </div>
+              </div>
+              <div class="img-placeholder">
+                <div class="ph-frame">
+                  <span class="ph-icon">📈</span>
+                  <span class="ph-name">tiempo_vs_bloque.png</span>
+                  <span class="ph-hint">Tiempo entrenamiento vs block size</span>
+                </div>
+              </div>
+              <div class="img-placeholder">
+                <div class="ph-frame">
+                  <span class="ph-icon">🖥</span>
+                  <span class="ph-name">nvidia_smi.png</span>
+                  <span class="ph-hint">Monitoreo GPU en tiempo real</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 5 · PERSONA 5 — MÉTRICAS + STREAMLIT -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="slide" id="slide-5">
+    <div class="slide-bg-grid"></div>
+    <div class="slide-inner">
+      <div class="slide-header">
+        <span class="persona-badge p5">PERSONA 5</span>
+        <h2 class="slide-title">Métricas, Evaluación & App Streamlit</h2>
+        <p class="slide-subtitle">Resultados cuantitativos y pipeline completo desplegado</p>
+      </div>
+
+      <div class="content-grid two-col">
+        <!-- Left: metrics -->
+        <div class="panel-col">
+          <!-- Curvas de entrenamiento -->
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot blue"></span>Curvas de Entrenamiento</h3>
+            <div class="img-compare-row">
+              <div class="img-placeholder">
+                <div class="ph-frame">
+                  <span class="ph-icon">📉</span>
+                  <span class="ph-name">curva_perdida.png</span>
+                  <span class="ph-hint">Train Loss vs Val Loss</span>
+                </div>
+              </div>
+              <div class="img-placeholder">
+                <div class="ph-frame">
+                  <span class="ph-icon">📈</span>
+                  <span class="ph-name">curva_exactitud.png</span>
+                  <span class="ph-hint">Train Acc vs Val Acc</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Confusion matrix + metrics -->
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot purple"></span>Matriz de Confusión & Métricas</h3>
+            <div class="img-compare-row">
+              <div class="img-placeholder">
+                <div class="ph-frame">
+                  <span class="ph-icon">🔲</span>
+                  <span class="ph-name">matriz_confusion.png</span>
+                  <span class="ph-hint">TP · TN · FP · FN</span>
+                </div>
+              </div>
+              <div class="img-placeholder">
+                <div class="ph-frame">
+                  <span class="ph-icon">📋</span>
+                  <span class="ph-name">metricas.png</span>
+                  <span class="ph-hint">Precision · Recall · F1</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="code-block small">
+<pre><span class="cm">// Cálculo de métricas en CPU tras evaluación test</span>
+m.accuracy  = (TP + TN) / num_images;
+m.precision = TP / (TP + FP);
+m.recall    = TP / (TP + FN);
+m.f1 = <span class="num">2</span> * (m.precision * m.recall)
+           / (m.precision + m.recall);</pre>
+            </div>
+
+            <div class="metrics-formula-row">
+              <div class="mf-card">
+                <div class="mf-name">Precision</div>
+                <div class="mf-formula">TP / (TP + FP)</div>
+              </div>
+              <div class="mf-card">
+                <div class="mf-name">Recall</div>
+                <div class="mf-formula">TP / (TP + FN)</div>
+              </div>
+              <div class="mf-card">
+                <div class="mf-name">F1-Score</div>
+                <div class="mf-formula">2 · (P·R) / (P+R)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Streamlit App -->
+        <div class="panel-col">
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot green"></span>Aplicación Streamlit — Inferencia en Vivo</h3>
+
+            <div class="app-pipeline">
+              <div class="ap-step">📷 Cámara Web / Imagen cargada</div>
+              <div class="ap-arrow">↓</div>
+              <div class="ap-step">⬜ Escala de grises → Resize 64×64</div>
+              <div class="ap-arrow">↓</div>
+              <div class="ap-step" style="border-color:#00d4ff">🔲 Filtro Sobel (réplica exacta del C)</div>
+              <div class="ap-arrow">↓</div>
+              <div class="ap-step" style="border-color:#a855f7">🧠 Forward Pass NumPy (sin frameworks)</div>
+              <div class="ap-arrow">↓</div>
+              <div class="ap-step" style="border-color:#76b900">🎯 P(encorvada) ≥ 0.5 → Clasificación</div>
+            </div>
+
+            <div class="img-compare-row">
+              <div class="img-placeholder">
+                <div class="ph-frame">
+                  <span class="ph-icon">🖥</span>
+                  <span class="ph-name">app_streamlit.png</span>
+                  <span class="ph-hint">Interfaz de la aplicación</span>
+                </div>
+              </div>
+              <div class="img-placeholder">
+                <div class="ph-frame">
+                  <span class="ph-icon">⚡</span>
+                  <span class="ph-name">inferencia.png</span>
+                  <span class="ph-hint">Resultado de clasificación</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot blue"></span>Carga de Pesos Binarios CUDA</h3>
+            <div class="code-block small">
+<pre><span class="cm"># Pesos exportados directamente por train.cu</span>
+W1 = np.fromfile(<span class="str">"weights/W1.bin"</span>,
+     dtype=np.float32).reshape(<span class="num">128</span>, <span class="num">4096</span>)
+b1 = np.fromfile(<span class="str">"weights/b1.bin"</span>,
+     dtype=np.float32).reshape(<span class="num">128</span>)
+W2 = np.fromfile(<span class="str">"weights/W2.bin"</span>,
+     dtype=np.float32).reshape(<span class="num">1</span>, <span class="num">128</span>)
+b2 = np.fromfile(<span class="str">"weights/b2.bin"</span>,
+     dtype=np.float32).reshape(<span class="num">1</span>)
+
+<span class="cm"># El pipeline en Python es idéntico al de C</span>
+<span class="cm"># No se usa PyTorch, TensorFlow ni ningún framework</span></pre>
+            </div>
+            <div class="insight-box" style="border-color:#76b900">
+              <span class="insight-icon">🎯</span>
+              <span>Los pesos entrenados en <strong>C/CUDA</strong> se exportan como archivos binarios raw y se cargan directamente en Python. Pipeline completamente interoperable sin serialización adicional.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 6 · LIMITACIONES + CONCLUSIONES -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="slide" id="slide-6">
+    <div class="slide-bg-grid"></div>
+    <div class="slide-inner">
+      <div class="slide-header">
+        <h2 class="slide-title">Limitaciones, Trabajo Futuro & Conclusiones</h2>
+        <p class="slide-subtitle">Reflexión técnica sobre el pipeline implementado</p>
+      </div>
+
+      <div class="content-grid two-col">
+        <!-- Limitations + future -->
+        <div class="panel-col">
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot orange"></span>Limitaciones Identificadas</h3>
+            <div class="limit-list">
+              <div class="limit-item">
+                <span class="limit-icon">📊</span>
+                <div>
+                  <strong>Dataset relativamente pequeño</strong>
+                  <div class="limit-desc">1489 imágenes. Mayor diversidad mejoraría la generalización.</div>
+                </div>
+              </div>
+              <div class="limit-item">
+                <span class="limit-icon">💡</span>
+                <div>
+                  <strong>Sensibilidad a condiciones de iluminación</strong>
+                  <div class="limit-desc">Variaciones extremas de luz afectan la respuesta del filtro Sobel.</div>
+                </div>
+              </div>
+              <div class="limit-item">
+                <span class="limit-icon">🧠</span>
+                <div>
+                  <strong>Limitaciones del MLP plano (4096→128→1)</strong>
+                  <div class="limit-desc">No captura jerarquías espaciales como lo haría una CNN.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel glass">
+            <h3 class="panel-title"><span class="icon-dot blue"></span>Trabajo Futuro</h3>
+            <div class="future-grid">
+              <div class="future-item">
+                <span class="fi-icon">🔲</span>
+                <span><strong>CNN</strong> — Capas convolucionales para extracción de características espaciales</span>
+              </div>
+              <div class="future-item">
+                <span class="fi-icon">🔄</span>
+                <span><strong>Data Augmentation</strong> — Rotaciones, flips, ruido para ampliar dataset</span>
+              </div>
+              <div class="future-item">
+                <span class="fi-icon">⚡</span>
+                <span><strong>Memoria Compartida CUDA</strong> — Shared memory para reducir accesos globales</span>
+              </div>
+              <div class="future-item">
+                <span class="fi-icon">🎯</span>
+                <span><strong>cuBLAS</strong> — Librería NVIDIA para multiplicación de matrices altamente optimizada</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conclusions -->
+        <div class="panel glass">
+          <h3 class="panel-title"><span class="icon-dot green"></span>Conclusiones Técnicas</h3>
+
+          <div class="conclusion-list">
+            <div class="conc-item">
+              <div class="conc-num c1">01</div>
+              <div class="conc-text">
+                <strong>OpenMP redujo significativamente los tiempos de preprocesamiento</strong>
+                <span>12 hilos procesando imágenes independientes con schedule(dynamic) para balance de carga óptimo.</span>
+              </div>
+            </div>
+            <div class="conc-item">
+              <div class="conc-num c2">02</div>
+              <div class="conc-text">
+                <strong>CUDA aceleró el entrenamiento neuronal mediante paralelismo masivo</strong>
+                <span>Kernels lanzados con grids 2D. Cada thread computa un elemento de la matriz de activaciones.</span>
+              </div>
+            </div>
+            <div class="conc-item">
+              <div class="conc-num c3">03</div>
+              <div class="conc-text">
+                <strong>El filtro Sobel demostró ser efectivo como extractor de características</strong>
+                <span>Reduce 3-canal RGB a geometría corporal en 1 canal → entrada más limpia y compacta para el MLP.</span>
+              </div>
+            </div>
+            <div class="conc-item">
+              <div class="conc-num c4">04</div>
+              <div class="conc-text">
+                <strong>Red neuronal implementada desde cero sin frameworks externos</strong>
+                <span>Forward + Backward pass, BCE Loss, L2 regularización y Early Stopping implementados en C/CUDA puro.</span>
+              </div>
+            </div>
+            <div class="conc-item">
+              <div class="conc-num c5">05</div>
+              <div class="conc-text">
+                <strong>Pipeline completo funcional de extremo a extremo</strong>
+                <span>Imágenes brutas → Preprocesamiento → Entrenamiento GPU → Inferencia en tiempo real con Streamlit.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Final pipeline summary -->
+          <div class="final-pipeline">
+            <div class="fp-item fp-green">📁 Dataset</div>
+            <div class="fp-arrow">→</div>
+            <div class="fp-item fp-blue">⚡ OpenMP</div>
+            <div class="fp-arrow">→</div>
+            <div class="fp-item fp-blue">🔲 Sobel</div>
+            <div class="fp-arrow">→</div>
+            <div class="fp-item fp-purple">🚀 CUDA</div>
+            <div class="fp-arrow">→</div>
+            <div class="fp-item fp-orange">🎯 App</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- end slides-wrapper -->
+
+<!-- Navigation arrows -->
+<button class="nav-arrow left" id="prev-btn" onclick="changeSlide(-1)" title="Anterior">&#8592;</button>
+<button class="nav-arrow right" id="next-btn" onclick="changeSlide(1)" title="Siguiente">&#8594;</button>
+
+<!-- Slide label -->
+<div class="slide-label" id="slide-label">Portada</div>
+
+<script src="script.js"></script>
+</body>
+</html>

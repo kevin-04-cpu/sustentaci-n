@@ -295,3 +295,98 @@ init();
 
 window.changeSlide = changeSlide;
 window.goToSlide   = goToSlide;
+
+// ═══════════════════════════════════════════════════
+//  IMAGE LIGHTBOX
+// ═══════════════════════════════════════════════════
+(function () {
+  var overlay = document.getElementById('lightbox-overlay');
+  var lbImg   = document.getElementById('lightbox-img');
+  var lbCap   = document.getElementById('lightbox-caption');
+  var closeBtn = document.getElementById('lightbox-close');
+
+  if (!overlay || !lbImg) return;
+
+  function openLightbox(src, caption) {
+    lbImg.src = src;
+    lbCap.textContent = caption || '';
+    lbCap.style.display = caption ? 'block' : 'none';
+    overlay.classList.add('active');
+    // Bloquear scroll del slide
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    // Limpiar src tras la animación
+    setTimeout(function () {
+      if (!overlay.classList.contains('active')) {
+        lbImg.src = '';
+      }
+    }, 400);
+  }
+
+  // Cerrar con botón ×
+  closeBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    closeLightbox();
+  });
+
+  // Cerrar al hacer click fuera de la imagen
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay || e.target.classList.contains('lightbox-content')) {
+      closeLightbox();
+    }
+  });
+
+  // Cerrar con Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overlay.classList.contains('active')) {
+      closeLightbox();
+    }
+  });
+
+  // Delegación de eventos: escuchar clicks en imágenes dentro de ph-frame
+  document.addEventListener('click', function (e) {
+    // Buscar si el click fue en una imagen dentro de un .ph-frame
+    var img = e.target.closest('.ph-frame img');
+    if (img) {
+      e.preventDefault();
+      e.stopPropagation();
+      var frame = img.closest('.ph-frame');
+      var nameEl = frame ? frame.querySelector('.ph-name') : null;
+      var hintEl = frame ? frame.querySelector('.ph-hint') : null;
+      var caption = '';
+      if (hintEl && hintEl.textContent.trim()) {
+        caption = hintEl.textContent.trim();
+      } else if (nameEl && nameEl.textContent.trim()) {
+        caption = nameEl.textContent.trim();
+      }
+      openLightbox(img.src, caption);
+      return;
+    }
+
+    // También permitir click en el frame completo si tiene imagen
+    var frame = e.target.closest('.ph-frame');
+    if (frame) {
+      var frameImg = frame.querySelector('img');
+      if (frameImg && frameImg.src) {
+        e.preventDefault();
+        var nameEl = frame.querySelector('.ph-name');
+        var hintEl = frame.querySelector('.ph-hint');
+        var caption = '';
+        if (hintEl && hintEl.textContent.trim()) {
+          caption = hintEl.textContent.trim();
+        } else if (nameEl && nameEl.textContent.trim()) {
+          caption = nameEl.textContent.trim();
+        }
+        openLightbox(frameImg.src, caption);
+      }
+    }
+  });
+
+  // Exponer para uso externo si es necesario
+  window.openLightbox  = openLightbox;
+  window.closeLightbox = closeLightbox;
+})();

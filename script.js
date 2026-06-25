@@ -5,11 +5,11 @@
 const TOTAL_SLIDES = 7;
 const SLIDE_LABELS = [
   'Portada',
-  'Persona 1 - Dataset',
-  'Persona 2 - Preprocesamiento & Sobel',
-  'Persona 3 - MLP & Forward Pass',
-  'Persona 4 - CUDA & Entrenamiento GPU',
-  'Persona 5 - Metricas & Streamlit',
+  'Dataset',
+  'Preprocesamiento & Sobel',
+  'MLP & Forward Pass',
+  'CUDA & Entrenamiento GPU',
+  'Métricas & Streamlit',
   'Limitaciones & Conclusiones'
 ];
 

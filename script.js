@@ -253,9 +253,9 @@ function tryLoadImages() {
       var img  = new Image();
       img.onload = function () {
         var icon = frame.querySelector('.ph-icon');
-        var hint = frame.querySelector('.ph-hint');
+        var nameEl = frame.querySelector('.ph-name');
         if (icon) icon.remove();
-        if (hint) hint.textContent = name;
+        if (nameEl) nameEl.style.display = 'none';
         img.style.cssText = 'max-width:100%;max-height:100px;border-radius:4px;object-fit:cover;margin-bottom:4px;';
         frame.insertBefore(img, nameEl);
         frame.style.borderStyle = 'solid';
@@ -355,13 +355,10 @@ window.goToSlide   = goToSlide;
       e.preventDefault();
       e.stopPropagation();
       var frame = img.closest('.ph-frame');
-      var nameEl = frame ? frame.querySelector('.ph-name') : null;
       var hintEl = frame ? frame.querySelector('.ph-hint') : null;
       var caption = '';
       if (hintEl && hintEl.textContent.trim()) {
         caption = hintEl.textContent.trim();
-      } else if (nameEl && nameEl.textContent.trim()) {
-        caption = nameEl.textContent.trim();
       }
       openLightbox(img.src, caption);
       return;
@@ -373,13 +370,10 @@ window.goToSlide   = goToSlide;
       var frameImg = frame.querySelector('img');
       if (frameImg && frameImg.src) {
         e.preventDefault();
-        var nameEl = frame.querySelector('.ph-name');
         var hintEl = frame.querySelector('.ph-hint');
         var caption = '';
         if (hintEl && hintEl.textContent.trim()) {
           caption = hintEl.textContent.trim();
-        } else if (nameEl && nameEl.textContent.trim()) {
-          caption = nameEl.textContent.trim();
         }
         openLightbox(frameImg.src, caption);
       }

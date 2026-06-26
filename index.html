@@ -359,6 +359,7 @@ omp_set_num_threads(<span class="num">12</span>);
                 <div class="ph-frame">
                   <span class="ph-icon">📷</span>
                   <span class="ph-name">imagen_original.png</span>
+                  <span class="ph-hint">Imagen original</span>
                 </div>
               </div>
               <div class="compare-arrow">→</div>
@@ -366,6 +367,7 @@ omp_set_num_threads(<span class="num">12</span>);
                 <div class="ph-frame" style="border-color:#00d4ff">
                   <span class="ph-icon" style="color:#00d4ff">🔲</span>
                   <span class="ph-name" style="color:#00d4ff">imagen_sobel.png</span>
+                  <span class="ph-hint">Filtro Sobel</span>
                 </div>
               </div>
             </div>
@@ -593,7 +595,7 @@ pred = <span class="str">"ENCORVADA"</span> <span class="kw">if</span> a2[<span 
                 <rect x="46" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.7"/><text x="53" y="62" text-anchor="middle" fill="#000" font-size="7" font-family="Outfit">T</text>
                 <rect x="64" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.7"/><text x="71" y="62" text-anchor="middle" fill="#000" font-size="7" font-family="Outfit">T</text>
                 <rect x="82" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.7"/><text x="89" y="62" text-anchor="middle" fill="#000" font-size="7" font-family="Outfit">T</text>
-                <text x="35" y="89" text-anchor="middle" fill="#6b7280" font-size="7" font-family="Outfit">32×32</text>
+                <text x="35" y="89" text-anchor="middle" fill="#6b7280" font-size="7" font-family="Outfit">8×8</text>
                 <text x="65" y="89" text-anchor="middle" fill="#6b7280" font-size="7" font-family="Outfit">threads</text>
                 <!-- Block 2 -->
                 <rect x="120" y="30" width="90" height="65" rx="4" fill="#0d2010" stroke="#76b900" stroke-width="1"/>
@@ -602,7 +604,7 @@ pred = <span class="str">"ENCORVADA"</span> <span class="kw">if</span> a2[<span 
                 <rect x="146" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.7"/>
                 <rect x="164" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.7"/>
                 <rect x="182" y="51" width="14" height="14" rx="2" fill="#76b900" opacity="0.7"/>
-                <text x="165" y="89" text-anchor="middle" fill="#6b7280" font-size="7" font-family="Outfit">1024 threads</text>
+                <text x="165" y="89" text-anchor="middle" fill="#6b7280" font-size="7" font-family="Outfit">64 threads</text>
                 <!-- Block 3 -->
                 <rect x="220" y="30" width="90" height="65" rx="4" fill="#0d2010" stroke="#76b900" stroke-width="1"/>
                 <text x="265" y="46" text-anchor="middle" fill="#76b900" font-size="9" font-family="Outfit">Block (2,0)</text>
@@ -620,11 +622,11 @@ pred = <span class="str">"ENCORVADA"</span> <span class="kw">if</span> a2[<span 
               </svg>
             </div>
             <div class="code-block small">
-<pre><span class="cm">// Configuración dinámica: block 32×32</span>
-dim3 threadsPerBlock(<span class="num">32</span>, <span class="num">32</span>);  <span class="cm">// 1024 threads/block</span>
+<pre><span class="cm">// Configuración dinámica: block 8×8</span>
+dim3 threadsPerBlock(<span class="num">8</span>, <span class="num">8</span>);  <span class="cm">// 64 threads/block</span>
 dim3 grid_FW1(
-  (HIDDEN_SIZE + <span class="num">32</span> - <span class="num">1</span>) / <span class="num">32</span>,
-  (num_images   + <span class="num">32</span> - <span class="num">1</span>) / <span class="num">32</span>
+  (HIDDEN_SIZE + <span class="num">8</span> - <span class="num">1</span>) / <span class="num">8</span>,
+  (num_images   + <span class="num">8</span> - <span class="num">1</span>) / <span class="num">8</span>
 );
 
 <span class="cm">// Lanzamiento del kernel</span>
@@ -700,7 +702,7 @@ forward_layer1&lt;&lt;&lt;grid_FW1, threadsPerBlock&gt;&gt;&gt;(
               <div class="hp-item"><span class="hp-k">Épocas</span><span class="hp-v">1000 (con ES)</span></div>
               <div class="hp-item"><span class="hp-k">Learning Rate</span><span class="hp-v">0.05</span></div>
               <div class="hp-item"><span class="hp-k">L2 λ</span><span class="hp-v">0.0005</span></div>
-              <div class="hp-item"><span class="hp-k">Block Size</span><span class="hp-v">32×32</span></div>
+              <div class="hp-item"><span class="hp-k">Block Size</span><span class="hp-v">8×8</span></div>
               <div class="hp-item"><span class="hp-k">Loss Fn</span><span class="hp-v">BCE</span></div>
               <div class="hp-item"><span class="hp-k">Patience</span><span class="hp-v">4 eval</span></div>
             </div>
